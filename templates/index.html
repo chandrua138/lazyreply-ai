@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LazyReply AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <div class="logo">🦥 LazyReply AI</div>
+        <p class="subtitle">Less typing. More time for you.</p>
+
+        <section class="card">
+            <label for="message">Paste the message you received</label>
+            <textarea id="message" placeholder="Example: Can you send me the project report by tomorrow?"></textarea>
+
+            <button id="generateBtn" onclick="generateReply()">
+                Generate Reply ✨
+            </button>
+
+            <p id="status" role="status"></p>
+
+            <div id="result" hidden>
+                <h2>Your suggested reply</h2>
+                <div id="reply"></div>
+                <button id="copyBtn" class="copy-btn" onclick="copyReply()">
+                    Copy Reply
+                </button>
+            </div>
+        </section>
+
+        <footer>Powered by your local Ollama AI model</footer>
+    </main>
+
+    <script>
+        async function generateReply() {
+            const message = document.getElementById("message").value.trim();
+            const status = document.getElementById("status");
+            const button = document.getElementById("generateBtn");
+            const result = document.getElementById("result");
+
+            if (!message) {
+                status.textContent = "Please enter a message first.";
+                result.hidden = true;
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Generating...";
+            status.textContent = "AI is writing your reply. Please wait.";
+            result.hidden = true;
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({message})
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Something went wrong.");
+                }
+
+                document.getElementById("reply").textContent = data.reply;
+                result.hidden = false;
+                status.textContent = "Reply generated successfully!";
+            } catch (error) {
+                status.textContent = error.message;
+            } finally {
+                button.disabled = false;
+                button.textContent = "Generate Reply ✨";
+            }
+        }
+
+        async function copyReply() {
+            const reply = document.getElementById("reply").textContent;
+
+            try {
+                await navigator.clipboard.writeText(reply);
+                document.getElementById("status").textContent = "Reply copied!";
+            } catch {
+                document.getElementById("status").textContent =
+                    "Copy failed. Please select and copy the reply manually.";
+            }
+        }
+    </script>
+</body>
+</html>
