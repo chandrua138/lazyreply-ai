@@ -1,6 +1,7 @@
 # LazyReply AI 🦥
 
 **Less typing. More time for you.**
+![LazyReply AI dashboard](screenshots/lazyreply-ai.png)
 
 LazyReply AI is a simple web application that uses a local AI model to generate short, polite replies to messages.
 
